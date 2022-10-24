@@ -17,6 +17,15 @@ print(params)
 engine = sa.create_engine("mssql+pyodbc:///?odbc_connect=%s"%params)
 engine.connect()
 
+def dfSanitize(argDF):
+    argDF['End_Time'] = pd.to_datetime(argDF['End_Time'], infer_datetime_format=True)
+    argDF['Start_Time'] = pd.to_datetime(argDF['Start_Time'], infer_datetime_format = True)
+
+    filterCB = lambda arg: re.sub(r'%', '', arg).strip()
+    for theColumn in argDF:
+        if theColumn != 'Start_Time' and theColumn !='End_Time' and r'%' in str(argDF[theColumn].loc[0]):
+            argDF[theColumn] = pd.to_numeric(argDF[theColumn].apply(filterCB))
+    return argDF
 
 def saveIntoDB(dataFrame, tableName, db_connection):
     try:
@@ -41,9 +50,7 @@ for dirPath, dirNames, fileNames in os.walk(KPIsRoute):
             newColumnName = re.sub(r'\(.*\)','', column.replace(' ', '_')).strip()
             KPIDataFrame.rename(columns={column:newColumnName}, inplace=True)
 
-        KPIDataFrame['End_Time'] = pd.to_datetime(KPIDataFrame['End_Time'], infer_datetime_format=True)
-        KPIDataFrame['Start_Time'] = pd.to_datetime(KPIDataFrame['Start_Time'], infer_datetime_format=True)
-
+        KPIDataFrame = dfSanitize(KPIDataFrame)
         # print(KPIDataFrame.head())
 
         # shutil.move(fileRoute, KPIsBackUpRoute)
