@@ -7,10 +7,19 @@ import os
 import shutil
 import pandas as pd
 import zipfile
+from functools import partial
+import time
 
 # Logging settings
-logging.basicConfig(filename='./messages.log', encoding='utf-8', level=logging.INFO)
-logging.info(20*'*'+ 'Logging corresponding to '+ str(datetime.datetime.now()) + 20*'*')
+try:
+    logPath = r"C:/Users/Administrator/Documents/Scripts/databaseLoader/messages.log"
+    if not os.path.exists(logPath):
+        raise ValueError('The specified path does not seem to exists')
+    logging.basicConfig(filename=logPath, encoding='utf-8', level=logging.INFO)
+except [SyntaxError, ValueError]:
+    print('Errors while trying to configure the logging module, check it\'s configuration...')
+    time.sleep(3)
+    input('Press enter to exit')
 
 # DB settings
 server='WIN-SNQUCAIM13C'
@@ -23,7 +32,7 @@ try:
     engine = sa.create_engine("mssql+pyodbc:///?odbc_connect=%s"%params)
     engine.connect()
     logging.info(f'Succesfully connected to {database}')
-except Exception as ex:
+except:
     logging.error('Failed to connect to database. Check your db settings.')
 
 
@@ -71,6 +80,7 @@ def main():
     KPIsBackUpRoute='K:/BACKUPS/CSV_files/'
 
     # Extraccion de los zips
+    startTime = time.time()
     try:
         if not os.path.exists(KPIsRoute):
             raise Exception('The path doesn\'t exist')
@@ -85,10 +95,15 @@ def main():
                     fileRoute = os.path.join(dirPath, fileName)
                     with zipfile.ZipFile(fileRoute) as zip_ref:
                         zip_ref.extractall(KPIsRoute)
-                    
+                        
+                    logging.info(f'The file {fileName} has been extracted successfuly')
                     os.remove(fileRoute)
 
-        print(f'{len(filesToExtract)} files have been extracted')
+        endTime = time.time()
+        messageString = f'{len(filesToExtract)} files have been extracted in {endTime - startTime} seconds'
+        print(messageString)
+        logging.info(messageString)
+
     except Exception as ex:
         logging.error('Something went wrong while reading the route to the KPI files: '+ KPIsRoute)
         logging.error(ex)
@@ -113,6 +128,8 @@ def main():
                 KPIDataFrame = dfSanitize(KPIDataFrame)
 
                 shutil.move(fileRoute, KPIsBackUpRoute)
+
+                startTime = time.time()
 
                 if 'RAN' in fileName: # and (datetime.datetime.now() - datetime.timedelta(days=1)).strftime("%Y%m%d") in fileName:
                     saveIntoDB(KPIDataFrame, 'ran_kpis', engine, 'append') # Saving the found file
@@ -152,6 +169,12 @@ def main():
                     yesterdays_mme_kpis = KPIDataFrame[(KPIDataFrame['Start_Time'] < today) & (KPIDataFrame['Start_Time'] >= yesterday)]
                     saveIntoDB(yesterdays_mme_kpis, 'yesterdays_mme_kpis', engine, 'replace')
                     logging.info('yesterdays_mme_kpis saved successfully')
+                
+                endTime = time.time()
+
+                messageString = f"This operation took {endTime - startTime} seconds."
+                print(messageString)
+                logging.info(messageString)
 
     # Cierre de conexion
     except Exception as ex:
@@ -163,6 +186,7 @@ def main():
     return 0
 
 if __name__=='__main__':
+    logging.info(20*'*'+ 'Logging corresponding to '+ str(datetime.datetime.now()) + 20*'*')
     if main() != 0:
         print('Abnormal execution, refer to the logs for more information')
         logging.error('Something went wrong')
