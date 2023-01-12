@@ -41,11 +41,10 @@ def main():
 
                 KPIDataFrame = dbLoader.dfSanitize(KPIDataFrame)
 
-                shutil.move(fileRoute, KPIsBackUpRoute)
-
                 startTime = time.time()
 
                 if 'RCP' in fileName: # and (datetime.datetime.now() - datetime.timedelta(days=1)).strftime("%Y%m%d") in fileName:
+                    shutil.move(fileRoute, KPIsBackUpRoute)
                     print(fileName)
                     dbLoader.saveIntoDB(KPIDataFrame, 'rcp_kpis', dbLoader.engine, 'append')
                     dbLoader.logging.info('rcp_kpis saved successfully')
@@ -54,6 +53,7 @@ def main():
                     dbLoader.logging.info('yesterdays_rcp_kpis saved successfully')
 
                 if 'USPP' in fileName: # and (datetime.datetime.now() - datetime.timedelta(days=1)).strftime("%Y%m%d") in fileName:
+                    shutil.move(fileRoute, KPIsBackUpRoute)
                     print(fileName)
                     dbLoader.saveIntoDB(KPIDataFrame, 'uspp_kpis', dbLoader.engine, 'append')
                     dbLoader.logging.info('uspp_kpis saved successfully')
@@ -62,6 +62,7 @@ def main():
                     dbLoader.logging.info('yesterdays_uspp_kpis saved successfully')
 
                 if 'xGW' in fileName: # and (datetime.datetime.now() - datetime.timedelta(days=1)).strftime("%Y%m%d") in fileName:
+                    shutil.move(fileRoute, KPIsBackUpRoute)
                     print(fileName)
                     dbLoader.saveIntoDB(KPIDataFrame, 'xgw_kpis', dbLoader.engine, 'append')
                     dbLoader.logging.info('xgw_kpis saved successfully')
@@ -70,6 +71,7 @@ def main():
                     dbLoader.logging.info('yesterdays_xgw_kpis saved successfully')
 
                 if 'MME' in fileName: # and (datetime.datetime.now() - datetime.timedelta(days=1)).strftime("%Y%m%d") in fileName:
+                    shutil.move(fileRoute, KPIsBackUpRoute)
                     print(fileName)
                     dbLoader.saveIntoDB(KPIDataFrame, 'mme_kpis', dbLoader.engine, 'append')
                     dbLoader.logging.info('mme_kpis saved successfully')

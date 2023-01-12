@@ -40,11 +40,10 @@ def main():
 
                 KPIDataFrame = dbLoader.dfSanitize(KPIDataFrame)
 
-                shutil.move(fileRoute, KPIsBackUpRoute)
-
                 startTime = time.time()
 
                 if 'RAN' in fileName:
+                    shutil.move(fileRoute, KPIsBackUpRoute)
                     dbLoader.saveIntoDB(KPIDataFrame, 'ran_kpis', dbLoader.engine, 'append')
                     dbLoader.logging.info('ran_kpis saved successfully')
                     saveCB = lambda df: dbLoader.saveIntoDB(df, 'daily_ran_summary', dbLoader.engine, 'append')
